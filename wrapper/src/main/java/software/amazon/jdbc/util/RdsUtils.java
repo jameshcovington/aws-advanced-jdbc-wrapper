@@ -116,6 +116,16 @@ public class RdsUtils {
           ".*(?<prefix>-green-[0-9a-z]{6})\\..*",
           Pattern.CASE_INSENSITIVE);
 
+  private static final Pattern BG_OLD_HOST_PATTERN =
+      Pattern.compile(
+          ".*(?<prefix>-old1)\\..*",
+          Pattern.CASE_INSENSITIVE);
+
+  private static final Pattern BG_PREFIX_HOST_PATTERN =
+      Pattern.compile(
+          ".*(?<prefix>-(green-[0-9a-z]{6}|old1))\\..*",
+          Pattern.CASE_INSENSITIVE);
+
   private static final Map<String, Matcher> cachedPatterns = new ConcurrentHashMap<>();
   private static final Map<String, String> cachedDnsPatterns = new ConcurrentHashMap<>();
 
@@ -259,6 +269,14 @@ public class RdsUtils {
 
   public boolean isGreenInstance(final String host) {
     return !StringUtils.isNullOrEmpty(host) && BG_GREEN_HOST_PATTERN.matcher(host).matches();
+  }
+
+  public boolean isOldInstance(final String host) {
+    return !StringUtils.isNullOrEmpty(host) && BG_OLD_HOST_PATTERN.matcher(host).matches();
+  }
+
+  public boolean isNoPrefixInstance(final String host) {
+    return !StringUtils.isNullOrEmpty(host) && !BG_PREFIX_HOST_PATTERN.matcher(host).matches();
   }
 
   public String removeGreenInstancePrefix(final String host) {

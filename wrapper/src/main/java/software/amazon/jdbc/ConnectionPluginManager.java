@@ -215,7 +215,7 @@ public class ConnectionPluginManager implements CanReleaseResources, Wrapper {
       throw new IllegalArgumentException("jdbcMethodFunc");
     }
 
-    // noinspection unchecked
+    @SuppressWarnings({"unchecked", "noinspection"})
     PluginChainJdbcCallable<T, E> pluginChainFunc = this.pluginChainFuncMap.get(methodName);
 
     if (pluginChainFunc == null) {
@@ -607,7 +607,7 @@ public class ConnectionPluginManager implements CanReleaseResources, Wrapper {
     return false;
   }
 
-  public ConnectionProvider getDefaultConnProvider() {
+  public @NonNull ConnectionProvider getDefaultConnProvider() {
     return this.defaultConnProvider;
   }
 

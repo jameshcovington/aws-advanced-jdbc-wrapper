@@ -269,6 +269,21 @@ public class RdsUtilsTests {
   }
 
   @Test
+  public void testNoPrefixInstanceHostName() {
+    assertTrue(target.isNoPrefixInstance("test-instance"));
+    assertTrue(target.isNoPrefixInstance("test-instance.domain.com"));
+    assertTrue(target.isNoPrefixInstance("test-instance-green.domain.com"));
+    assertTrue(target.isNoPrefixInstance("test-instance-green-1.domain.com"));
+    assertTrue(target.isNoPrefixInstance("test-instance-green-12345.domain.com"));
+    assertFalse(target.isNoPrefixInstance("test-instance-green-abcdef.domain.com"));
+    assertTrue(target.isNoPrefixInstance("test-instance-green-abcdef-.domain.com"));
+    assertTrue(target.isNoPrefixInstance("test-instance-green-abcdef-12345.domain.com"));
+    assertTrue(target.isNoPrefixInstance("test-instance-green-abcdef-12345-green.domain.com"));
+    assertTrue(target.isNoPrefixInstance("test-instance-green-abcdef-12345-green-00000.domain.com"));
+    assertFalse(target.isNoPrefixInstance("test-instance-green-abcdef-12345-green-000000.domain.com"));
+  }
+
+  @Test
   public void testRemoveGreenInstancePrefix() {
     assertNull(target.removeGreenInstancePrefix(null));
     assertEquals("", target.removeGreenInstancePrefix(""));

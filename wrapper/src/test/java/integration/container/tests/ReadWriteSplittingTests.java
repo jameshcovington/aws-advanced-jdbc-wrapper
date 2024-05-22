@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,7 +49,9 @@ import integration.container.condition.EnableOnNumOfInstances;
 import integration.container.condition.EnableOnTestFeature;
 import integration.container.condition.MakeSureFirstInstanceWriter;
 import integration.util.AuroraTestUtility;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -88,7 +91,6 @@ import software.amazon.jdbc.util.SqlState;
     TestEnvironmentFeatures.RUN_HIBERNATE_TESTS_ONLY,
     TestEnvironmentFeatures.RUN_AUTOSCALING_TESTS_ONLY})
 @MakeSureFirstInstanceWriter
-@Disabled
 @Order(12)
 public class ReadWriteSplittingTests {
 
@@ -128,7 +130,7 @@ public class ReadWriteSplittingTests {
 
   protected static Properties getPropsWithFailover() {
     final Properties props = getDefaultPropsNoPlugins();
-    PropertyDefinition.PLUGINS.set(props, "failover,efm2");
+    PropertyDefinition.PLUGINS.set(props, "failover,efm2,readWriteSplitting");
     final TestEnvironmentRequest request = TestEnvironment.getCurrent().getInfo().getRequest();
     if (request.getDatabaseEngineDeployment() == DatabaseEngineDeployment.RDS_MULTI_AZ) {
       if (request.getDatabaseEngine() == DatabaseEngine.MYSQL) {
@@ -535,17 +537,24 @@ public class ReadWriteSplittingTests {
   @TestTemplate
   @EnableOnNumOfInstances(min = 3)
   @EnableOnTestFeature({TestEnvironmentFeatures.NETWORK_OUTAGES_ENABLED})
-  public void test_failoverReaderToWriter_setReadOnlyTrueFalse() throws SQLException {
+  public void test_failoverReaderToWriter_setReadOnlyTrueFalse() throws SQLException, UnknownHostException {
+
+    for (TestInstanceInfo info : TestEnvironment.getCurrent().getInfo().getDatabaseInfo().getInstances()) {
+      LOGGER.finest(String.format("%s -> %s", info.getHost(), InetAddress.getByName(info.getHost()).getHostAddress()));
+    }
+
     try (final Connection conn =
              DriverManager.getConnection(ConnectionStringHelper.getProxyWrapperUrl(), getProxiedPropsWithFailover())) {
 
       final String writerConnectionId = auroraUtil.queryInstanceId(conn);
+      LOGGER.finest("writerConnectionId=" + writerConnectionId);
 
       conn.setReadOnly(true);
       final String readerConnectionId = auroraUtil.queryInstanceId(conn);
+      LOGGER.finest("readerConnectionId=" + readerConnectionId);
       assertNotEquals(writerConnectionId, readerConnectionId);
 
-      final List<TestInstanceInfo> instances = TestEnvironment.getCurrent().getInfo().getDatabaseInfo()
+      final List<TestInstanceInfo> instances = TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo()
           .getInstances();
 
       // Kill all instances except the writer
@@ -557,19 +566,26 @@ public class ReadWriteSplittingTests {
         ProxyHelper.disableConnectivity(instanceId);
       }
 
+      for (TestInstanceInfo info : TestEnvironment.getCurrent().getInfo().getDatabaseInfo().getInstances()) {
+        LOGGER.finest(String.format("%s -> %s", info.getHost(), InetAddress.getByName(info.getHost()).getHostAddress()));
+      }
+
       auroraUtil.assertFirstQueryThrows(conn, FailoverSuccessSQLException.class);
       assertFalse(conn.isClosed());
       String currentConnectionId = auroraUtil.queryInstanceId(conn);
+      LOGGER.finest("currentConnectionId=" + currentConnectionId);
       assertEquals(writerConnectionId, currentConnectionId);
 
       ProxyHelper.enableAllConnectivity();
 
       conn.setReadOnly(true);
       currentConnectionId = auroraUtil.queryInstanceId(conn);
+      LOGGER.finest("currentConnectionId=" + currentConnectionId);
       assertNotEquals(writerConnectionId, currentConnectionId);
 
       conn.setReadOnly(false);
       currentConnectionId = auroraUtil.queryInstanceId(conn);
+      LOGGER.finest("currentConnectionId=" + currentConnectionId);
       assertEquals(writerConnectionId, currentConnectionId);
     }
   }

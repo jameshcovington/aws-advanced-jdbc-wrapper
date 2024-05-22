@@ -17,6 +17,7 @@
 package integration.container;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.platform.commons.util.AnnotationUtils.isAnnotated;
 
@@ -191,19 +192,40 @@ public class TestDriverProvider implements TestTemplateInvocationContextProvider
                     dbInfo.moveInstanceFirst(currentWriter);
                     testInfo.getProxyDatabaseInfo().moveInstanceFirst(currentWriter);
 
-                    // Wait for cluster URL to resolve to the writer
+                    // Wait for cluster endpoint to resolve to the writer
                     startTimeNano = System.nanoTime();
                     String clusterInetAddress = auroraUtil.hostToIP(dbInfo.getClusterEndpoint());
                     String writerInetAddress =
                         auroraUtil.hostToIP(dbInfo.getInstances().get(0).getHost());
                     while (!writerInetAddress.equals(clusterInetAddress)
                         && TimeUnit.NANOSECONDS.toMinutes(System.nanoTime() - startTimeNano) < 5) {
+                      Thread.sleep(5000);
                       clusterInetAddress = auroraUtil.hostToIP(dbInfo.getClusterEndpoint());
                       writerInetAddress =
                           auroraUtil.hostToIP(dbInfo.getInstances().get(0).getHost());
-                      Thread.sleep(5000);
                     }
                     assertTrue(writerInetAddress.equals(clusterInetAddress));
+
+                    if (instanceIDs.size() > 1) {
+                      // Wait for cluster RO endpoint to resolve NOT to the writer
+                      startTimeNano = System.nanoTime();
+                      String clusterROInetAddress = auroraUtil.hostToIP(dbInfo.getClusterReadOnlyEndpoint());
+                      LOGGER.finest("clusterROInetAddress: " + clusterROInetAddress);
+                      writerInetAddress =
+                          auroraUtil.hostToIP(dbInfo.getInstances().get(0).getHost());
+                      LOGGER.finest("writerInetAddress: " + writerInetAddress);
+                      while (writerInetAddress.equals(clusterROInetAddress)
+                          && TimeUnit.NANOSECONDS.toMinutes(System.nanoTime() - startTimeNano) < 10) {
+                        Thread.sleep(5000);
+                        clusterROInetAddress = auroraUtil.hostToIP(dbInfo.getClusterReadOnlyEndpoint());
+                        LOGGER.finest("clusterROInetAddress: " + clusterROInetAddress);
+                        writerInetAddress =
+                            auroraUtil.hostToIP(dbInfo.getInstances().get(0).getHost());
+                        LOGGER.finest("writerInetAddress: " + writerInetAddress);
+                      }
+                      assertFalse(writerInetAddress.equals(clusterROInetAddress));
+                    }
+
                   } else {
                     instanceIDs =
                         TestEnvironment.getCurrent().getInfo().getDatabaseInfo().getInstances()

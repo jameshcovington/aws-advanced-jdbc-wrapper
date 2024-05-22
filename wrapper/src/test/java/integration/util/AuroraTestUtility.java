@@ -901,11 +901,13 @@ public class AuroraTestUtility {
   public void assertFirstQueryThrows(Connection connection, Class expectedSQLExceptionClass) {
     assertThrows(
         expectedSQLExceptionClass,
-        () ->
-            queryInstanceId(
-                TestEnvironment.getCurrent().getInfo().getRequest().getDatabaseEngine(),
-                TestEnvironment.getCurrent().getInfo().getRequest().getDatabaseEngineDeployment(),
-                connection));
+        () -> {
+          String instanceId = queryInstanceId(
+              TestEnvironment.getCurrent().getInfo().getRequest().getDatabaseEngine(),
+              TestEnvironment.getCurrent().getInfo().getRequest().getDatabaseEngineDeployment(),
+              connection);
+          LOGGER.finest(() -> "Instance ID: " + instanceId);
+        });
   }
 
   public void failoverClusterAndWaitUntilWriterChanged() throws InterruptedException {

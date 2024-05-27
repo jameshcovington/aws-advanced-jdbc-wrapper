@@ -168,10 +168,10 @@ public class RdsHostListProvider implements DynamicHostListProvider {
           TimeUnit.MILLISECONDS.toNanos(CLUSTER_TOPOLOGY_REFRESH_RATE_MS.getInteger(properties));
 
       HostSpecBuilder hostSpecBuilder = this.hostListProviderService.getHostSpecBuilder();
-      this.clusterInstanceTemplate =
-          CLUSTER_INSTANCE_HOST_PATTERN.getString(this.properties) == null
-              ? hostSpecBuilder.host(rdsHelper.getRdsInstanceHostPattern(originalUrl)).build()
-              : hostSpecBuilder.host(CLUSTER_INSTANCE_HOST_PATTERN.getString(this.properties)).build();
+      String clusterInstancePattern = CLUSTER_INSTANCE_HOST_PATTERN.getString(this.properties) == null
+          ? rdsHelper.getRdsInstanceHostPattern(originalUrl)
+          : CLUSTER_INSTANCE_HOST_PATTERN.getString(this.properties);
+      this.clusterInstanceTemplate = ConnectionUrlParser.parseHostPortPair(clusterInstancePattern, () -> hostSpecBuilder);
       validateHostPatternSetting(this.clusterInstanceTemplate.getHost());
 
       this.rdsUrlType = rdsHelper.identifyRdsType(originalUrl);

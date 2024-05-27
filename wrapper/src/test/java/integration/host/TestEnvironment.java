@@ -691,7 +691,8 @@ public class TestEnvironment implements AutoCloseable {
           container.getMappedPort(PROXY_CONTROL_PORT));
 
       try {
-        LOGGER.finest(String.format("%s -> %s", instance.getHost(), InetAddress.getByName(instance.getHost()).getHostAddress()));
+        LOGGER.finest(String.format("%s -> %s",
+            instance.getHost(), InetAddress.getByName(instance.getHost()).getHostAddress()));
       } catch (UnknownHostException e) {
         LOGGER.finest("Error getting IP address for " + instance.getHost() + " : " + e.getMessage());
       }

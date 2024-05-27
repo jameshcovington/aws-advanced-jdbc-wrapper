@@ -567,7 +567,8 @@ public class ReadWriteSplittingTests {
       }
 
       for (TestInstanceInfo info : TestEnvironment.getCurrent().getInfo().getDatabaseInfo().getInstances()) {
-        LOGGER.finest(String.format("%s -> %s", info.getHost(), InetAddress.getByName(info.getHost()).getHostAddress()));
+        LOGGER.finest(String.format("%s -> %s",
+            info.getHost(), InetAddress.getByName(info.getHost()).getHostAddress()));
       }
 
       auroraUtil.assertFirstQueryThrows(conn, FailoverSuccessSQLException.class);

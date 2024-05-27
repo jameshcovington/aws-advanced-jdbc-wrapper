@@ -173,7 +173,10 @@ public class RdsMultiAzDbClusterListProvider extends RdsHostListProvider {
 
     String hostName = resultSet.getString("endpoint"); // "instance-name.XYZ.us-west-2.rds.amazonaws.com"
     String instanceName = hostName.substring(0, hostName.indexOf(".")); // "instance-name"
-    final String endpoint = getHostEndpoint(instanceName);  // "instance-name.XYZ.us-west-2.rds.amazonaws.com" based on cluster instance template
+
+    // "instance-name.XYZ.us-west-2.rds.amazonaws.com" based on cluster instance template
+    final String endpoint = getHostEndpoint(instanceName);
+
     String hostId = resultSet.getString("id");
     int queryPort = resultSet.getInt("port");
     final int port = this.clusterInstanceTemplate.isPortSpecified()

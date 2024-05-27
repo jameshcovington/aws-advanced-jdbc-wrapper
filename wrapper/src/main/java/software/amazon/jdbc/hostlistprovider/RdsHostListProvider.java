@@ -171,7 +171,8 @@ public class RdsHostListProvider implements DynamicHostListProvider {
       String clusterInstancePattern = CLUSTER_INSTANCE_HOST_PATTERN.getString(this.properties) == null
           ? rdsHelper.getRdsInstanceHostPattern(originalUrl)
           : CLUSTER_INSTANCE_HOST_PATTERN.getString(this.properties);
-      this.clusterInstanceTemplate = ConnectionUrlParser.parseHostPortPair(clusterInstancePattern, () -> hostSpecBuilder);
+      this.clusterInstanceTemplate =
+          ConnectionUrlParser.parseHostPortPair(clusterInstancePattern, () -> hostSpecBuilder);
       validateHostPatternSetting(this.clusterInstanceTemplate.getHost());
 
       this.rdsUrlType = rdsHelper.identifyRdsType(originalUrl);

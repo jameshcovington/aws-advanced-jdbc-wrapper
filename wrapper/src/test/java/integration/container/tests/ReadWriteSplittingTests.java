@@ -100,16 +100,16 @@ public class ReadWriteSplittingTests {
   protected static Properties getProxiedPropsWithFailover() {
     final Properties props = getPropsWithFailover();
     AuroraHostListProvider.CLUSTER_INSTANCE_HOST_PATTERN.set(props,
-        "?." + TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo()
-            .getInstanceEndpointSuffix());
+        "?." + TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo().getInstanceEndpointSuffix()
+            + ":" + TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo().getInstanceEndpointPort());
     return props;
   }
 
   protected static Properties getProxiedProps() {
     final Properties props = getProps();
     AuroraHostListProvider.CLUSTER_INSTANCE_HOST_PATTERN.set(props,
-        "?." + TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo()
-            .getInstanceEndpointSuffix());
+        "?." + TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo().getInstanceEndpointSuffix()
+            + ":" + TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo().getInstanceEndpointPort());
     return props;
   }
 

@@ -575,11 +575,8 @@ public class AuroraFailoverTest {
     DriverHelper.setSocketTimeout(props, 10, TimeUnit.SECONDS);
     AuroraHostListProvider.CLUSTER_INSTANCE_HOST_PATTERN.set(
         props,
-        "?."
-            + TestEnvironment.getCurrent()
-                .getInfo()
-                .getProxyDatabaseInfo()
-                .getInstanceEndpointSuffix());
+        "?." + TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo().getInstanceEndpointSuffix()
+          + ":" + TestEnvironment.getCurrent().getInfo().getProxyDatabaseInfo().getInstanceEndpointPort());
     return props;
   }
 

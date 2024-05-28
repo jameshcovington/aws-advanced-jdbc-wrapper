@@ -131,14 +131,6 @@ public class ReadWriteSplittingTests {
   protected static Properties getPropsWithFailover() {
     final Properties props = getDefaultPropsNoPlugins();
     PropertyDefinition.PLUGINS.set(props, "failover,efm2,readWriteSplitting");
-//     final TestEnvironmentRequest request = TestEnvironment.getCurrent().getInfo().getRequest();
-//     if (request.getDatabaseEngineDeployment() == DatabaseEngineDeployment.RDS_MULTI_AZ) {
-//       if (request.getDatabaseEngine() == DatabaseEngine.MYSQL) {
-//         props.setProperty("wrapperDialect", "rds-multi-az-mysql-cluster");
-//       } else if (request.getDatabaseEngine() == DatabaseEngine.PG) {
-//         props.setProperty("wrapperDialect", "rds-multi-az-pg-cluster");
-//       }
-//     }
     return props;
   }
 
